@@ -1,0 +1,93 @@
+<html>
+<head><title>Bookmark to desktop settings</title></head>
+<style>
+body {
+  min-width:300px;
+  overflow-x:hidden;
+  font-family: verdana;
+}
+
+img {
+  float:left;
+}
+
+h1 {
+  font-size: 15px;
+  font-decoration: bold;
+  margin-bottom: 6px;
+}
+
+.small {
+  font-size: 12px;
+}
+
+</style>
+<script type="text/javascript">
+// analytics code
+var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-19731716-1']);
+_gaq.push(['_trackPageview']);
+
+(function() {
+   var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+   ga.src = 'https://ssl.google-analytics.com/ga.js';
+   var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+})();
+
+// Saves options to localStorage
+function save_options() {
+  var username = document.getElementById("username").value;
+  var password = document.getElementById("password").value;
+  var push = document.getElementById("push").value;
+  localStorage["username"] = username;
+  localStorage["password"] = password;
+  localStorage["userwantspush"] = push;
+
+  // Update status to let user know options were saved
+  var status = document.getElementById("status");
+  status.innerHTML = "Options Saved.";
+  document.getElementById("form").innerHTML = "";
+
+  if (push) {
+    // login
+    chrome.extension.getBackgroundPage().openchannel();
+  } else {
+    // attempt logout
+    chrome.extension.getBackgroundPage().quit();
+  }
+}
+
+// Restores options from localStorage
+function restore_options() {
+  var username = localStorage["username"];
+  var password = localStorage["password"];
+  var push = localStorage["userwantspush"];
+  if (!username || !password) {
+    return;
+  }
+  document.getElementById("username").value = username;
+  document.getElementById("password").value = password;
+  document.getElementById("push").checked = push;
+}
+
+</script>
+
+<body onload="restore_options()">
+<h2>Bookmark to desktop extension settings</h2>
+
+<p id="status"></p>
+<div id="form" />
+<p>username: <input id="username" type="text" /></p>
+<p>password: <input id="password" type="password" /></p>
+<p>allow push to browser?: <input id="push" type="checkbox" checked="true" />  (opens a new tab with the bookmark immediately after it is sent from the phone)</p>
+<p><button onclick="save_options()">Save</button></p>
+</div>
+<img src="icon.png" />
+
+<p>Before you use this extension don't forget to download the Bookmark to Desktop application on your Android phone!</p>
+<p>You don't have an account yet? The Android application allows you to create one.</p>
+<p>IMPORTANT: This application and chrome extension are currently in an early beta stage. If you encounter any bugs or have comments/feature requests then please send me an email at steven.v.bael@gmail.com or contact me on twitter <a href="http://twitter.com/vbsteven">@vbsteven</a></p>
+<h2>Download the android application by scanning this QR code</h2>
+<img src="qrcode.png"/>
+</body>
+</html>

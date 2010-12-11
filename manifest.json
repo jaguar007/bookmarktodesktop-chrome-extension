@@ -1,0 +1,18 @@
+{
+  "name": "Bookmark to Desktop",
+  "version": "0.3.2",
+  "description": "Chrome extension for the Bookmark to desktop Android application",
+  "options_page": "options.html",
+  "background_page": "background.html",
+  "icons": { "128":"icon.png" },
+  "browser_action": {
+    "default_icon":"icon.png",
+    "popup":"popup.html"
+  },
+  "permissions": [
+    "bookmarks",
+    "notifications",
+    "tabs",
+    "http://bookmarktodesktop.appspot.com/"
+  ]
+}

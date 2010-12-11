@@ -1,0 +1,333 @@
+<html>
+<head></head>
+<body onload="do_on_load()">
+<script src='/channel.js'></script>
+<script>
+
+var connected = false; // to check if we are online
+
+/*
+ * update gui according to connection state
+ */
+function updateConnectionState(state) {
+  connected = state;
+  
+  if (connected) {
+    // put the push badge over the icon
+    badge = new Object();
+    badge.text = 'PUSH';
+    chrome.browserAction.setBadgeText(badge);
+  } else {
+    // remove the badge
+    badge = new Object();
+    badge.text = '';
+    chrome.browserAction.setBadgeText(badge);
+  }
+}
+
+/*
+ * called when the appengine channel is opened
+ */
+function onOpened() {
+  console.log('channel opened');
+  connected = true;
+  updateConnectionState(true);
+}
+
+/*
+ * called when a message is received via the appengine channel
+ */
+function onMessage(message) {
+  body = message.data;
+  console.log('channel message received: ' + body);
+  onPushBookmarkReceived(body);
+}
+
+/*
+ * handle error from appengine channel
+ */
+function onError(error) {
+  console.log('channel error ' + error.code + ' ' + error.description);
+  connected = false;
+  updateConnectionState(false);
+}
+
+/*
+ * called when appengine channel closes
+ */
+function onClose() {
+  console.log('channel closed');
+  connected = false;
+  updateConnectionState(false);
+
+  // try reconnecting
+  openchannel();
+}
+
+/*
+ * fetches token from server and opens appengine channel
+ */
+function openchannel() {
+  var username = localStorage['username'];
+  var password = localStorage['password'];
+  var push = localStorage['userwantspush'];
+
+  // quick check
+  if (!username || !password || username.length < 1 || password.length < 1) {
+    updateConnectionState(false);
+    return;
+  }
+
+  if (!push) {
+    // user does not want push
+    updateConnectionState(false);
+    return;
+  }
+  
+  // get the token from the server
+  path = "http://bookmarktodesktop.appspot.com/requesttoken";
+  path += "?username=" + username + "&password=" + password;
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', path, false);
+  xhr.send();
+
+  if (xhr.status != 200) {
+    // no OK response
+    updateConnectionState(false);
+    return;
+  }
+
+  if (xhr.response == 'INVALIDLOGIN') {
+    // authentication on server failed
+    show_authfail_notification();
+    updateConnectionState(false);
+    return;
+  }
+  
+  token = xhr.response;
+  console.log('received token: ' + token);
+
+  // setup channel
+  channel = new goog.appengine.Channel(token);
+  socket = channel.open();
+  socket.onopen = onOpened;
+  socket.onmessage = onMessage;
+  socket.onerror = onError;
+  socket.onclose = onClose;
+}
+
+
+/* 
+ * opens a new tab with the given url
+ */
+function openUrl(url) {
+  props = new Object();
+  props.url = url;
+  chrome.tabs.create(props);
+}
+
+/*
+ * called when we received a push bookmark
+ * decode and show
+ */
+function onPushBookmarkReceived(data) {
+  console.log('onPushBookmarkReceived: ' + data);
+  bookmark = eval('(' + data + ')');
+  console.log('title: ' + bookmark.bookmark.title);
+  console.log('url: ' + bookmark.bookmark.url);
+
+  openUrl(bookmark.bookmark.url);
+}
+
+
+// begin analytics code
+
+var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-19731716-1']);
+_gaq.push(['_trackPageview']);
+
+(function() {
+   var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+   ga.src = 'https://ssl.google-analytics.com/ga.js';
+   var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+})();
+
+function trackPopup(name) {
+  _gaq.push(['_trackEvent', name, 'shown']);
+};
+
+
+// end analytics code
+
+
+
+var req;
+var bookmarks; 
+var show_notif_on_fail = false;
+
+
+/*
+ * tries to fetch bookmarks from the server
+ */
+function fetch_bookmarks(force) {
+  var username = localStorage["username"];
+  var password = localStorage["password"];
+  
+  if (!username || !password) {
+    // not configured yet
+    return;
+  }
+
+  if (force) {
+    show_notif_on_fail = true;
+  } else {
+    show_notif_on_fail = false;
+  }
+
+  req = new XMLHttpRequest();
+  req.open("GET", "http://bookmarktodesktop.appspot.com/fetchbookmarks?username=" + username + "&password=" + password, true);
+  req.onload = check_bookmark_folder;
+  req.send(null);
+}
+
+/*
+ * creates bookmarktodesktop folder
+ * after the folder is created it adds the bookmarks in var bookmarks
+ */
+function create_bookmark_folder() {
+  var name = 'bookmarktodesktop';
+  var otherBookmarksID = 0; 
+  chrome.bookmarks.getTree(function(tree){ 
+        bookmarkbarid = tree[0].children[0].id; 
+        chrome.bookmarks.create({'parentId': bookmarkbarid,'title': name}, function(newfolder) {
+	  add_bookmarks(newfolder.id);
+	});
+  }); 
+}
+
+/*
+ * looks for the bookmarktodesktop folder in the bookmarks
+ *
+ * if it doesn't find it, calls create_bookmark_folder()
+ * if it finds it, adds the bookmarks saved in var bookmarks
+ */
+function check_bookmark_folder() {
+
+  chrome.bookmarks.getTree(function(tree){ 
+        bookmarkbarid = tree[0].children[0].id;
+	chrome.bookmarks.getChildren(bookmarkbarid, function(children) {
+          var name = 'bookmarktodesktop'
+	  var found = false;
+	  children.forEach(function(bookmark) { 
+	    if (bookmark.title == name) {
+	      add_bookmarks(bookmark.id);
+	      found = true;
+	    }
+	    });
+	    if (!found) {
+	       create_bookmark_folder();
+	    }
+        });
+  }); 
+  
+}
+
+/*
+ * adds bookmarks stored in var bookmarks to folder with given folderid
+ */
+function add_bookmarks(folderid) {
+  console.log('responseText = ' + req.responseText);
+  if (req.responseText == 'INVALIDLOGIN') {
+    show_authfail_notification()
+    return;
+  }
+
+  bookmarks = req.responseXML.getElementsByTagName('bookmark');
+  
+  for (var i = 0; i < bookmarks.length; i++){
+    bookmark = bookmarks[i];
+    url = bookmark.getElementsByTagName('url')[0].firstChild.nodeValue;
+    title = bookmark.getElementsByTagName('title')[0].firstChild;
+    if (title == null) {
+      title = url;
+    } else {
+      title = title.nodeValue;
+    }
+
+    chrome.bookmarks.create({'parentId': folderid,'title': title,'url': url});
+  }
+  if (bookmarks.length > 0) {
+    show_notification(bookmarks.length);
+  }
+
+  if (bookmarks.length == 0 && show_notif_on_fail == true) {
+    show_noentries_notification();
+  }
+}
+
+/*
+ * shows desktop notification with the given amount of bookmarks
+ */
+function show_notification(number) {
+  var notification = webkitNotifications.createNotification(
+  'icon.png',
+  'Bookmark to desktop',
+  number + ' bookmarks saved to bookmarkstodesktop folder'
+  );
+  notification.show();
+  trackPopup('fetchsuccessful');
+}
+
+/* 
+ * shows notification when authentication failed
+ */
+function show_authfail_notification() {
+  var notification = webkitNotifications.createNotification(
+  'icon.png',
+  'Bookmark to desktop',
+  'Authentication failed, Please check your account info'
+  );
+  notification.show();
+  trackPopup('authfail');
+}
+
+/*
+ * shows notification when the user manually checked for bookmarks
+ * and nothing is returned
+ */
+function show_noentries_notification() {
+  var notification = webkitNotifications.createNotification(
+  'icon.png',
+  'Bookmark to desktop',
+  'No bookmarks found on the server'
+  );
+  notification.show();
+  trackPopup('noentries');
+}
+
+/*
+ * called when the extension loads and mainly inits timers
+ */
+function do_on_load() {
+
+  // initial bookmark fetch
+  fetch_bookmarks();
+
+  openchannel();
+
+  /* set timers */
+
+  timeouthandle = setInterval(function() {
+        fetch_bookmarks();
+      }, 30*60*1000) // check every 30 minutes
+
+  channeltimeouthandle = setInterval(function() {
+        openchannel();
+      }, 30*60*1000) // re-open channel every 30minutes
+}
+</script>
+
+</body>
+
+
+ 
