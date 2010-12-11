@@ -1,0 +1,19 @@
+========================================
+Chrome extension for Bookmark to Desktop
+========================================
+
+Google Chrome/Chromium extension for the Bookmark to Desktop service.
+The service allows android users to send links from their android phone
+to their desktop browser.
+
+At this stage the extension does two things:
+
+1) it polls the server every 30 minutes for new bookmarks, if new bookmarks
+   are found they are saved into the bookmarktodesktop folder on the bookmarks
+   bar
+
+2) If the extension is registered towards the service when the user sends a 
+   link from his phone to the browser, then the link will immediately open
+   in a new tab. The 'push' from server to extension happens through the google
+   appengine channel api
+
