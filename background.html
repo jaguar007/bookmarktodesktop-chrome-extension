@@ -104,7 +104,7 @@ function openchannel() {
     return;
   }
   
-  token = xhr.response;
+  token = xhr.responseText;
   console.log('received token: ' + token);
 
   // setup channel
