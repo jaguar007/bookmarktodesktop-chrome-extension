@@ -2,6 +2,8 @@
 <head></head>
 <body onload="do_on_load()">
 <script src='/channel.js'></script>
+<!-- enable this next script again once the appengine team put the chrome extension fix in production -->
+<!-- <script type="text/javascript" src="http://bookmarktodesktop.appspot.com/_ah/channel/jsapi"></script> -->
 <script>
 
 var connected = false; // to check if we are online
@@ -86,8 +88,13 @@ function openchannel() {
   path += "?username=" + username + "&password=" + password;
   var xhr = new XMLHttpRequest();
   xhr.open('GET', path, false);
-  xhr.send();
-
+  
+  try {
+    xhr.send();
+  } catch (e) {
+    console.log('an error ocurred while fetching the authentication token for the push notification channel');
+    return;
+  }
   if (xhr.status != 200) {
     // no OK response
     updateConnectionState(false);
