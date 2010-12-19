@@ -59,9 +59,6 @@ function onClose() {
   console.log('channel closed');
   connected = false;
   updateConnectionState(false);
-
-  // try reconnecting
-  openchannel();
 }
 
 /*
