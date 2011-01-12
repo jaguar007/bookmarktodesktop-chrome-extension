@@ -327,7 +327,7 @@ function do_on_load() {
 
   channeltimeouthandle = setInterval(function() {
         openchannel();
-      }, 30*60*1000) // re-open channel every 30minutes
+      }, 120*60*1000) // re-open channel every 120minutes (token expires after 2 hours)
 }
 </script>
 
