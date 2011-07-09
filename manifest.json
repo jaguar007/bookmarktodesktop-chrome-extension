@@ -1,6 +1,6 @@
 {
   "name": "Bookmark to Desktop",
-  "version": "0.3.5",
+  "version": "1.0",
   "description": "Chrome extension for the Bookmark to desktop Android application",
   "options_page": "options.html",
   "background_page": "background.html",
@@ -13,6 +13,6 @@
     "bookmarks",
     "notifications",
     "tabs",
-    "https://bookmarktodesktopdev.appspot.com/"
+    "https://bookmarktodesktop.appspot.com/"
   ]
 }

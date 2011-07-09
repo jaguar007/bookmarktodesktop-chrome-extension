@@ -80,22 +80,42 @@ function is_authenticated() {
 </script>
 
 <body onload="restore_options()">
-<h2>Bookmark to desktop extension settings</h2>
+    <img src="icon.png" />
+    <h2>Bookmark to desktop extension settings</h2>
 
-<p id="status"></p>
-<div id="form" />
-<p>username: <input id="username" type="text" /></p>
-<p>password: <input id="password" type="password" /></p>
-<p>destination folder: <input id="destination" type="text" /></p>
-<p>allow push to browser?: <input id="push" type="checkbox" checked="true" />  (opens a new tab with the bookmark immediately after it is sent from the phone)</p>
-<p><button onclick="save_options()">Save</button></p>
-</div>
-<img src="icon.png" />
+    <p id="status"></p>
+    <div id="form" />
+        <p>username: <input id="username" type="text" /></p>
+        <p>password: <input id="password" type="password" /></p>
+        <p>allow push to browser?: <input id="push" type="checkbox" checked="true" />  (opens a new tab with the bookmark immediately after it is sent from the phone)</p>
+        <p><button onclick="save_options()">Save</button></p>
+    </div>
 
-<p>Before you use this extension don't forget to download the Bookmark to Desktop application on your Android phone!</p>
-<p>You don't have an account yet? The Android application allows you to create one.</p>
-<p>IMPORTANT: This application and chrome extension are currently in an early beta stage. If you encounter any bugs or have comments/feature requests then please send me an email at steven.v.bael@gmail.com or contact me on twitter <a href="http://twitter.com/vbsteven">@vbsteven</a></p>
-<h2>Download the android application by scanning this QR code</h2>
-<img src="qrcode.png"/>
+    <p>Before you use this extension don't forget to download the Bookmark to Desktop application on your Android phone!</p>
+    <p>You don't have an account yet? The Android application allows you to create one.</p>
+    <p>Problems, questions or suggestions? Contact me on twitter (<a href="http://twitter.com/vbsteven">@vbsteven</a>) or enter a report on my <a href="http://littlegreenbugs.com/bugs/apps/bookmarktodesktop/">LittleGreenBugs page</a></p>
+
+    <br/>
+    <h2>Download the android application by scanning this QR code or browsing the <a href="https://market.android.com/details?id=be.vbsteven.bmtodesk">Android market</a></h2>
+    <img src="qrcode.png"/>
+
+    <br/>
+    <p style="clear:both;"><br />Bookmark to Desktop uses the freemium model. This means that basic functionality is available in the free version and extended functionality is available if you upgrade your license.</p>
+    <p>By upgrading your license on the <a href="">Android market</a> you are supporting further development and maintenance of this application. The generated income will be used to buy coffee that keeps me awake after my day job so I can work on these projects.</p>
+
+    <p>Features in the free version</p>
+    <ul>
+      <li>Send links from your Android device to the desktop extension</li>
+      <li>If the browser is open, sent links will be opened immediately (PUSH)</li>
+      <li>Sent links will be saved to the bookmarktodesktop folder in your bookmarks bar</li>
+      <li>Request your previously sent links via your own personalized RSS feed</li>
+    </ul>
+
+    <p>Extra features for premium users</p>
+    <ul>
+      <li>Send links from the desktop extension to your Android phone</li>
+      <li>That fuzzy warm feeling you get inside when you realize you supported a developer for the many late night hours he spent working on the application you love</li>
+    </ul>
+
 </body>
 </html>
