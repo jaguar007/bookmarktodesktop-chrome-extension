@@ -1,11 +1,12 @@
 <html>
 <head></head>
 <body onload="do_on_load()">
-<script src='/channel.js'></script>
+<!-- <script src='/channel.js'></script> -->
 <!-- enable this next script again once the appengine team put the chrome extension fix in production -->
-<!-- <script type="text/javascript" src="http://bookmarktodesktop.appspot.com/_ah/channel/jsapi"></script> -->
+<script type="text/javascript" src="http://bookmarktodesktop.appspot.com/_ah/channel/jsapi"></script>
 <script>
 
+var DOMAIN = "https://bookmarktodesktopdev.appspot.com/";
 var connected = false; // to check if we are online
 
 /*
@@ -71,6 +72,8 @@ function openchannel() {
   var password = localStorage['password'];
   var push = localStorage['userwantspush'];
 
+  password = encodeURIComponent(password);
+
   // quick check
   if (!username || !password || username.length < 1 || password.length < 1) {
     updateConnectionState(false);
@@ -84,7 +87,7 @@ function openchannel() {
   }
   
   // get the token from the server
-  path = "http://bookmarktodesktop.appspot.com/requesttoken";
+  path = DOMAIN + "api/requesttoken";
   path += "?username=" + username + "&password=" + password;
   var xhr = new XMLHttpRequest();
   xhr.open('GET', path, false);
@@ -176,6 +179,8 @@ var show_notif_on_fail = false;
 function fetch_bookmarks(force) {
   var username = localStorage["username"];
   var password = localStorage["password"];
+
+  password = encodeURIComponent(password);
   
   if (!username || !password) {
     // not configured yet
@@ -189,7 +194,7 @@ function fetch_bookmarks(force) {
   }
 
   req = new XMLHttpRequest();
-  req.open("GET", "http://bookmarktodesktop.appspot.com/fetchbookmarks?username=" + username + "&password=" + password, true);
+  req.open("GET", DOMAIN + "api/fetchbookmarks?username=" + username + "&password=" + password, true);
   req.onload = check_bookmark_folder;
   req.send(null);
 }
@@ -308,6 +313,33 @@ function show_noentries_notification() {
   notification.show();
   trackPopup('noentries');
 }
+
+
+function send_to_phone(url){
+  console.log('in background: send to phone: ' + url)
+  var username = localStorage["username"];
+  var password = localStorage["password"];
+
+  password = encodeURIComponent(password);
+  url = encodeURIComponent(url);
+  
+  if (!username || !password) {
+    // not configured yet
+    console.log('no username/password configured yet, returning')
+    return;
+  }
+
+    data = "username=" + username + "&password=" + password + "&url=" + url;
+  req = new XMLHttpRequest();
+  req.open("GET", DOMAIN + "api/sendtophone?" + data, true);
+  req.onload = send_to_phone_finished
+  req.send(data);  
+}
+
+function send_to_phone_finished() {
+  console.log('send_to_phone_finished');
+}
+
 
 /*
  * called when the extension loads and mainly inits timers

@@ -70,6 +70,13 @@ function restore_options() {
   document.getElementById("push").checked = push;
 }
 
+function is_authenticated() {
+    var username = localStorage["username"];
+    var password = localStorage["password"];
+
+    return (username && password);
+}
+
 </script>
 
 <body onload="restore_options()">
@@ -79,6 +86,7 @@ function restore_options() {
 <div id="form" />
 <p>username: <input id="username" type="text" /></p>
 <p>password: <input id="password" type="password" /></p>
+<p>destination folder: <input id="destination" type="text" /></p>
 <p>allow push to browser?: <input id="push" type="checkbox" checked="true" />  (opens a new tab with the bookmark immediately after it is sent from the phone)</p>
 <p><button onclick="save_options()">Save</button></p>
 </div>
